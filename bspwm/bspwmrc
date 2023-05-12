@@ -1,0 +1,246 @@
+#!/usr/bin/env bash
+
+## Copyright (C) 2020-2022 Aditya Shakya <adi1090x@gmail.com>
+## Everyone is permitted to copy and distribute copies of this file under GNU-GPL3
+
+## Environtment
+export PATH="${PATH}:$HOME/.config/bspwm/bin"
+
+## Java Applications
+wmname LG3D
+export _JAVA_AWT_WM_NONREPARENTING=1
+
+## Get colors from .Xresources -------------------------------#
+xrdb ~/.Xresources
+getcolors() {
+	FOREGROUND=$(xrdb -query | grep 'foreground:'| awk '{print $NF}')
+	BACKGROUND=$(xrdb -query | grep 'background:'| awk '{print $NF}')
+	BLACK=$(xrdb -query | grep 'color0:'| awk '{print $NF}')
+	RED=$(xrdb -query | grep 'color1:'| awk '{print $NF}')
+	GREEN=$(xrdb -query | grep 'color2:'| awk '{print $NF}')
+	YELLOW=$(xrdb -query | grep 'color3:'| awk '{print $NF}')
+	BLUE=$(xrdb -query | grep 'color4:'| awk '{print $NF}')
+	MAGENTA=$(xrdb -query | grep 'color5:'| awk '{print $NF}')
+	CYAN=$(xrdb -query | grep 'color6:'| awk '{print $NF}')
+	WHITE=$(xrdb -query | grep 'color7:'| awk '{print $NF}')
+}
+getcolors
+
+
+## Change kitty colors --------------------------------------------#
+
+kittyP="$HOME/.config/kitty/"
+# delete old file
+rm $kittyP/kitty.conf
+# copy model
+cp $HOME/.config/bspwm/kitty/model.conf $kittyP/kitty.conf
+
+echo "foreground $FOREGROUND" >> $kittyP/kitty.conf
+echo "background $BACKGROUND" >> $kittyP/kitty.conf
+echo " " >> $kittyP/kitty.conf
+echo "color0 $BLACK" >> $kittyP/kitty.conf
+echo "color8 $BLACK" >> $kittyP/kitty.conf
+echo " "
+echo "color1 $RED" >> $kittyP/kitty.conf
+echo "color9 $RED" >> $kittyP/kitty.conf
+echo " "
+echo "color2 $GREEN" >> $kittyP/kitty.conf
+echo "color10 $GREEN" >> $kittyP/kitty.conf
+echo " "
+echo "color3 $YELLOW" >> $kittyP/kitty.conf
+echo "color11 $YELLOW" >> $kittyP/kitty.conf
+echo " "
+echo "color4 $BLUE" >> $kittyP/kitty.conf
+echo "color12 $BLUE" >> $kittyP/kitty.conf
+echo " " >> $kittyP/kitty.conf
+echo "color5 $MAGENTA" >> $kittyP/kitty.conf
+echo "color13 $MAGENTA" >> $kittyP/kitty.conf
+echo " " >> $kittyP/kitty.conf
+echo "color6 $CYAN" >> $kittyP/kitty.conf
+echo "color14 $CYAN" >> $kittyP/kitty.conf
+echo " " >> $kittyP/kitty.conf
+echo "color7 $WHITE" >> $kittyP/kitty.conf
+echo "color15 $WHITE" >> $kittyP/kitty.conf
+## Configurations --------------------------------------------#
+
+if [[ "$(lsusb | grep "DisplayLink ThinkPad USB 3.0 Dock")" != "" ]]
+then
+	if [[ "$(xrandr | grep DVI-I-1-1)" != *"1920x1080"*  ]] && [[ "$(xrandr --listproviders | grep "Providers: number :")" == *"2"* ]]
+	then
+		xrandr --setprovideroutputsource 1 0
+		xrandr --output DVI-I-1-1 --auto --left-of eDP1
+	fi
+fi
+
+# work around till drivers for displaylink(evid) work again (6.2.2-arch1)
+#if [[ "$(xrandr | grep HDMI2)" == *" connected"* ]]
+#then
+#	echo "found HDMI extern screen"
+#	xrandr --output HDMI2 --auto --left-of eDP1
+#	set-bsp-bar default
+#else
+#	xrandr --output HDMI2 --off
+#fi
+
+workspaces() {
+#	name=1
+#	for monitor in $(xrandr -q | grep " connected" | cut -d ' ' -f1); do
+#		bspc monitor ${monitor} -n "$name" -d '' '' '' '' '' '' '' '磊' ''
+#		#bspc monitor ${monitor} -n "$name" -d 'I' 'II' 'III' 'IV' 'V' 'VI' 'VII' 'VIII'
+#		let name++
+# -_-_-_-_-_-_-_-_-_-_ connect thinkpad hub
+
+#	done
+name=1
+num="$(xrandr -q | grep " connected" | wc -l)"
+for monitor in $(bspc query -M --names)    
+do
+    if [[ "$num" == "1" ]]
+    then
+		bspc monitor ${monitor} -d '' '' '' '' '' '' '' '磊' ''
+    	break
+	elif [[ "$name" == "1" ]] && [[ "$num" != "1" ]] && [[ "$monitor" == "1" ]]
+    then
+		bspc monitor ${monitor} -d ''
+	elif [[ "$num" != "1" ]]
+	then
+		bspc monitor ${monitor} -d '' '' '' '' '' '' '' '磊' ''
+    fi  
+    let name++
+done
+}
+workspaces
+
+bspc config border_width 1
+bspc config window_gap 5
+bspc config split_ratio 0.50
+
+bspc config focused_border_color "$BLUE" 
+bspc config normal_border_color "$BACKGROUND"
+bspc config active_border_color "$MAGENTA"
+bspc config presel_feedback_color "$GREEN"
+
+bspc config borderless_monocle true
+bspc config gapless_monocle true
+bspc config paddingless_monocle true
+bspc config single_monocle false
+bspc config focus_follows_pointer true
+
+## Window rules ----------------------------------------------#
+
+# remove all rules first
+bspc rule -r *:*
+
+# 1 > terminal
+#bspc rule -a Alacritty desktop='^1' follow=on focus=on
+#bspc rule -a Xfce4-terminal desktop='^1' follow=on focus=on
+
+# 2 > web
+bspc rule -a firefox desktop='^2' follow=on focus=on
+bspc rule -a chromium desktop='^2' follow=on focus=on
+
+# 3 > files
+#declare -a files=(Pcmanfm Thunar qBittorrent)
+#for i in ${files[@]}; do
+#  bspc rule -a $i desktop='^3' follow=on focus=on; done
+
+# 4 > code
+declare -a code=(code-oss)
+for i in ${code[@]}; do
+   bspc rule -a $i desktop='^4' follow=on focus=on; done
+
+# 5 > office and docs
+declare -a office=(thunderbird Gucharmap Evince \
+libreoffice-writer libreoffice-calc libreoffice-impress \
+libreoffice-startcenter libreoffice Soffice *:libreofficedev *:soffice)
+for i in ${office[@]}; do
+   bspc rule -a $i desktop='^5' follow=on focus=on; done
+
+# 6 > Communication
+declare -a comm=(discord TelegramDesktop Hexchat)
+for i in ${comm[@]}; do
+   bspc rule -a $i desktop='^6' follow=on focus=on; done
+
+# 7 > media
+declare -a media=(Audacity Music MPlayer Lxmusic Inkscape Gimp-2.10 obs)
+for i in ${media[@]}; do
+   bspc rule -a $i desktop='^8' state=floating follow=on focus=on; done
+
+# 8 > settings
+bspc rule -a 'VirtualBox Manager' desktop='^8' follow=on focus=on
+bspc rule -a GParted desktop='^9' follow=on focus=on
+declare -a settings=(Lxappearance Lxtask Lxrandr Arandr \
+System-config-printer.py Exo-helper-1 \
+Xfce4-power-manager-settings)
+for i in ${settings[@]}; do
+   bspc rule -a $i desktop='^9' state=floating follow=on focus=on; done
+
+# special rules
+declare -a floating=(alacritty-float Pcmanfm Onboard Yad 'Firefox:Places' \
+Viewnior feh Nm-connection-editor galculator)
+for i in ${floating[@]}; do
+   bspc rule -a $i state=floating follow=on focus=on; done
+
+bspc rule -a Conky state=floating manage=off
+bspc rule -a stalonetray state=floating manage=off
+bspc rule -a kitty:R state=floating
+bspc rule -a mpv state=floating follow=on focus=on 
+## Autostart -------------------------------------------------#
+
+# Kill if already running
+killall -9 xsettingsd sxhkd dunst ksuperkey xfce4-power-manager
+
+# Lauch xsettingsd daemon
+xsettingsd &
+
+# polkit agent
+if [[ ! `pidof xfce-polkit` ]]; then
+	/usr/lib/xfce-polkit/xfce-polkit &
+fi
+
+# Lauch keybindings daemon
+sxhkd &
+
+# Enable Super Keys For Menu
+ksuperkey -e 'Super_L=Alt_L|F1' &
+ksuperkey -e 'Super_R=Alt_L|F1' &
+
+# Enable power management
+xfce4-power-manager &
+
+# Fix cursor
+xsetroot -cursor_name left_ptr
+
+ Start mpd
+# exec mpd &
+
+# Start bspwm scripts
+bspcolors
+#bspbar
+bspcomp
+bspdunst
+bspfloat &
+
+
+# -_-_-_-_-_-_-_-_-_-_ launch polybar
+THEME="$(cat $HOME/.config/bspwm/polybar/choosed_theme)"
+
+launcher="$HOME/.config/bspwm/bin/bsplauncher"
+echo "#!/bin/bash" > $launcher
+
+if ! [ -d ~/.startpage ]; then
+    mkdir  ~/.startpage
+fi
+rm ~/.startpage/* -rf
+
+if [ "$THEME" == "original" ]; then
+    bspbar
+else
+	bash ~/.config/bspwm/polybar/"$THEME"/launch.sh
+fi
+
+# Restore wallpaper
+current="$(cat $HOME/.wallpaper)"
+#feh --no-fehbg --bg-fill "$current"
+setwall $current
+

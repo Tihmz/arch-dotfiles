@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if [ "$(pidof polybar)" != "" ]; then
+    pkill -9 -f "polybar"
+fi
+
+launcher="$HOME/.config/bspwm/bin/bsplauncher"
+echo "#!/bin/bash" > $launcher
+
+THEME="$(cat /home/tihmz/.config/bspwm/polybar/choosed_theme)"
+if [ "$THEME" == "original" ]; then
+    bspbar
+else
+	if [ "$THEME" == "eva-02" ]; then
+		echo "bash ~/.config/bspwm/polybar/eva-02/scripts/launcher.sh" >> $launcher
+	    cp ~/.startpage-eva/* -r ~/.startpage/
+    else
+		echo "rofi -show-icons -show drun -modi run,drun,ssh" >> $launcher
+	    cp ~/.startpage-nord/* -r ~/.startpage/
+	fi
+	bash ~/.config/bspwm/polybar/"$THEME"/launch.sh > /dev/null 2>&1
+
+fi
+

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+num="$(xrandr -q | grep " connected" | wc -l)"
+if [[ "$2" == "" ]] 
+then
+    echo $1 > /home/tihmz/.wallpaper
+    feh --no-fehbg --bg-fill $1 
+else
+    echo $1 $2 > /home/tihmz/.wallpaper
+    if [[ "$num" != "1" ]]
+    then
+        feh --no-fehbg --bg-fill $1 $2
+    else
+        feh --no-fehbg --bg-fill $1
+    fi
+fi
+
+for i in "$@"
+do
+    if [[ "$i" == "--lock-screen" ]]
+    then
+        betterlockscreen -u "$1" --fx blur > /dev/null 2>&1
+    else
+        echo "pass"
+    fi
+done

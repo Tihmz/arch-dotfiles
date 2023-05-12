@@ -1,0 +1,208 @@
+"__     _____ __  __ ____   ____ 
+"\ \   / /_ _|  \/  |  _ \ / ___|
+" \ \ / / | || |\/| | |_) | |    
+" _\ V /  | || |  | |  _ <| |___ 
+"(_)\_/  |___|_|  |_|_| \_\\____|
+" 
+"https://towardsdatascience.com/the-essential-ideavim-remaps-291d4cd3971b
+"https://www.linuxfordevices.com/tutorials/linux/turn-vim-into-an-ide
+"https://www.freecodecamp.org/news/vimrc-configuration-guide-customize-your-vim-editor/9
+set nocompatible
+
+
+
+" PLUGINS
+
+call plug#begin()
+
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+"Plug 'maxboisvert/vim-simple-complete'
+"Plug 'LunarWatcher/auto-pairs'
+Plug 'matze/vim-move'
+Plug 'puremourning/vimspector'
+Plug 'mg979/vim-visual-multi', {'branch': 'master'}
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'NLKNguyen/papercolor-theme'
+
+Plug 'sheerun/vim-polyglot'
+Plug 'majutsushi/tagbar'
+" Plug 'yggdroot/indentline'
+Plug 'prettier/vim-prettier', { 'do': 'yarn install --frozen-lockfile --production'  }
+
+Plug 'https://github.com/preservim/nerdtree', { 'on': 'NERDTreeToggle' }
+Plug 'Xuyuanp/nerdtree-git-plugin'
+Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+Plug 'ryanoasis/vim-devicons'
+Plug 'airblade/vim-gitgutter'
+Plug 'ctrlpvim/ctrlp.vim' " fuzzy find files
+Plug 'scrooloose/nerdcommenter' 
+call plug#end()
+
+" DEFAULT SETTINGS --------------------------------------------------------------- {{{
+
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_save = 1
+let g:syntastic_check_on_wq = 0
+
+set encoding=utf-8
+
+set tabstop=4
+set expandtab
+filetype on
+filetype plugin on
+filetype indent on
+
+hi MatchParen cterm=none ctermbg=green ctermfg=black 
+set nu
+set ruler
+set mouse=a
+set nolist
+set laststatus=2
+set nobackup
+set nowrap
+set incsearch
+set smartcase
+set showcmd
+set showmatch
+set hlsearch
+set history=1000
+
+
+set wildmenu
+set wildmode=list:longest
+set wildignore=*.docx,*.jpg,*.png,*.gif,*.pdf,*.pyc,*.exe,*.flv,*.img,*.xlsx
+
+hi CursorLine cterm=NONE ctermfg=NONE ctermbg=black
+set cursorline
+" set cursorcolumn
+let &t_ut=''
+set background=dark
+"colorscheme gruvbox
+colorscheme PaperColor
+
+" }}}
+
+" MAPPINGS --------------------------------------------------------------- {{{
+
+map <C-c> <Esc>
+nnoremap <silent> <C-Left> :tabprevious<CR>                                                                            
+nnoremap <silent> <C-Right> :tabnext<CR>
+nnoremap <silent> <C-PageUp> :tabnew<CR>
+nnoremap <silent> <C-z> u<CR>
+nnoremap <silent> <C-y> <C-r>
+nnoremap <silent> <C-s> :nohl<CR>
+nnoremap <F2> :set nonumber!<CR>
+nnoremap <F3> :set pastetoggle<cr> 
+" comment python line
+map <silent> <S-c> :s/^/#/<CR>
+vmap <silent> <S-c> :s/^/#/<CR>
+
+" switch between panes
+map <silent> <C-w> :wincmd w<CR>
+
+" https://superuser.com/questions/401926/how-to-get-shiftarrows-and-ctrlarrows-working-in-vim-in-tmux/402084#402084
+if &term =~ '^tmux'
+    " tmux will send xterm-style keys when its xterm-keys option is on
+    execute "set <xUp>=\e[1;*A"
+    execute "set <xDown>=\e[1;*B"
+    execute "set <xRight>=\e[1;*C"
+    execute "set <xLeft>=\e[1;*D"
+endif
+" }}}
+
+" PLUGINS ---------------------------------------------------------------- {{{
+
+""""""""""""""""""
+" coc
+""""""""""""""""""
+
+inoremap <silent><expr> <TAB> coc#pum#visible() ? coc#pum#confirm() : "\<C-g>u\<TAB>"
+
+""""""""""""""""""
+" vim-move : https://github.com/matze/vim-move
+""""""""""""""""""
+
+let g:move_key_modifier = 'C'
+let g:move_key_modifier_visualmode = 'S'
+
+""""""""""""""""""
+" NERDTREE : https://github.com/preservim/nerdtree
+""""""""""""""""""
+
+"mapping
+nnoremap <silent> <C-t> :NERDTreeToggle<CR>
+
+" Exit Vim if NERDTree is the only window remaining in the only tab.
+autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
+
+""""""""""""""""""
+" tag bar : https://github.com/preservim/tagbar
+""""""""""""""""""
+
+nmap  <silent> <C-b> :TagbarToggle<CR>
+
+let g:tagbar_autofocus = 1
+
+""""""""""""""""""
+" vimspector
+""""""""""""""""""
+
+let g:vimspector_enable_mappings = 'HUMAN' 
+"https://github.com/puremourning/vimspector#human-mode
+"https://dev.to/iggredible/debugging-in-vim-with-vimspector-4n0m
+
+"""""""""""""""""
+" Prettier
+"""""""""""""""""
+let g:prettier#autoformat = 1
+let g:prettier#autoformat_require_pragma = 0
+
+"""""""""""""""""
+" Identline
+"""""""""""""""""
+
+" let g:indentLine_char_list = ['|', '¦', '┆', '┊']
+
+" }}}
+
+" VIMSCRIPT -------------------------------------------------------------- {{{
+
+" This will enable code folding.
+" Use the marker method of folding.
+augroup filetype_vim
+    autocmd!
+    autocmd FileType vim setlocal foldmethod=marker
+augroup END
+
+" More Vimscripts code goes here.
+
+" }}}
+
+" STATUS LINE ------------------------------------------------------------ {{{
+
+if !exists('g:airline_symbols')
+      let g:airline_symbols = {}
+endif
+" powerline symbols
+let g:airline_left_sep = ''
+let g:airline_left_alt_sep = ''
+let g:airline_right_sep = ''
+let g:airline_right_alt_sep = ''
+let g:airline_symbols.branch = ''
+let g:airline_symbols.readonly = ''
+let g:airline_symbols.linenr = '☰'
+let g:airline_symbols.maxlinenr = ''
+let g:airline_symbols.dirty='⚡'
+
+let g:airline_theme='tomorrow'
+function! s:update_git_status()
+  let g:airline_section_b = "%{get(g:,'coc_git_status','')}"
+endfunction
+
+let g:airline_section_b = "%{get(g:,'coc_git_status','')}"
+
+"autocmd User CocGitStatusChange silent! call s:update_git_status()
+"let g:airline_theme='base16_solarflare'
+" }}}
+
