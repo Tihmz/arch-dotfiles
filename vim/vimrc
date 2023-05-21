@@ -1,9 +1,9 @@
-"__     _____ __  __ ____   ____ 
+"__     _____ __  __ ____   ____
 "\ \   / /_ _|  \/  |  _ \ / ___|
-" \ \ / / | || |\/| | |_) | |    
-" _\ V /  | || |  | |  _ <| |___ 
+" \ \ / / | || |\/| | |_) | |
+" _\ V /  | || |  | |  _ <| |___
 "(_)\_/  |___|_|  |_|_| \_\\____|
-" 
+"
 "https://towardsdatascience.com/the-essential-ideavim-remaps-291d4cd3971b
 "https://www.linuxfordevices.com/tutorials/linux/turn-vim-into-an-ide
 "https://www.freecodecamp.org/news/vimrc-configuration-guide-customize-your-vim-editor/9
@@ -17,18 +17,21 @@ call plug#begin()
 
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 "Plug 'maxboisvert/vim-simple-complete'
-"Plug 'LunarWatcher/auto-pairs'
+Plug 'LunarWatcher/auto-pairs'
 Plug 'matze/vim-move'
 Plug 'puremourning/vimspector'
 Plug 'mg979/vim-visual-multi', {'branch': 'master'}
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'NLKNguyen/papercolor-theme'
+Plug 'morhetz/gruvbox'
+Plug 'bluz71/vim-nightfly-colors', { 'as': 'nightfly' }
+
+Plug 'dense-analysis/ale'
 
 Plug 'sheerun/vim-polyglot'
 Plug 'majutsushi/tagbar'
-" Plug 'yggdroot/indentline'
-Plug 'prettier/vim-prettier', { 'do': 'yarn install --frozen-lockfile --production'  }
+Plug 'yggdroot/indentline'
 
 Plug 'https://github.com/preservim/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'Xuyuanp/nerdtree-git-plugin'
@@ -36,7 +39,7 @@ Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 Plug 'ryanoasis/vim-devicons'
 Plug 'airblade/vim-gitgutter'
 Plug 'ctrlpvim/ctrlp.vim' " fuzzy find files
-Plug 'scrooloose/nerdcommenter' 
+Plug 'scrooloose/nerdcommenter'
 call plug#end()
 
 " DEFAULT SETTINGS --------------------------------------------------------------- {{{
@@ -53,7 +56,7 @@ filetype on
 filetype plugin on
 filetype indent on
 
-hi MatchParen cterm=none ctermbg=green ctermfg=black 
+hi MatchParen cterm=none ctermbg=green ctermfg=black
 set nu
 set ruler
 set mouse=a
@@ -68,8 +71,16 @@ set showmatch
 set hlsearch
 set history=1000
 
+let &t_SI .= "\<Esc>[?2004h"
+let &t_EI .= "\<Esc>[?2004l"
+inoremap <special> <expr> <Esc>[200~ XTermPasteBegin()
 
-set wildmenu
+function! XTermPasteBegin()
+  set pastetoggle=<Esc>[201~
+  set paste
+  return ""
+endfunction
+
 set wildmode=list:longest
 set wildignore=*.docx,*.jpg,*.png,*.gif,*.pdf,*.pyc,*.exe,*.flv,*.img,*.xlsx
 
@@ -79,21 +90,22 @@ set cursorline
 let &t_ut=''
 set background=dark
 "colorscheme gruvbox
-colorscheme PaperColor
-
+"colorscheme PaperColor
+let g:nightflyTransparent = v:true
+colorscheme nightfly
 " }}}
 
 " MAPPINGS --------------------------------------------------------------- {{{
 
 map <C-c> <Esc>
-nnoremap <silent> <C-Left> :tabprevious<CR>                                                                            
+nnoremap <silent> <C-Left> :tabprevious<CR>
 nnoremap <silent> <C-Right> :tabnext<CR>
 nnoremap <silent> <C-PageUp> :tabnew<CR>
 nnoremap <silent> <C-z> u<CR>
 nnoremap <silent> <C-y> <C-r>
 nnoremap <silent> <C-s> :nohl<CR>
 nnoremap <F2> :set nonumber!<CR>
-nnoremap <F3> :set pastetoggle<cr> 
+nnoremap <F3> :set pastetoggle<cr>
 " comment python line
 map <silent> <S-c> :s/^/#/<CR>
 vmap <silent> <S-c> :s/^/#/<CR>
@@ -148,15 +160,20 @@ let g:tagbar_autofocus = 1
 " vimspector
 """"""""""""""""""
 
-let g:vimspector_enable_mappings = 'HUMAN' 
+let g:vimspector_enable_mappings = 'HUMAN'
 "https://github.com/puremourning/vimspector#human-mode
 "https://dev.to/iggredible/debugging-in-vim-with-vimspector-4n0m
 
 """""""""""""""""
 " Prettier
 """""""""""""""""
-let g:prettier#autoformat = 1
-let g:prettier#autoformat_require_pragma = 0
+
+let g:ale_fixers = {
+            \   'javascript': ['prettier'],
+            \   'css': ['prettier'],
+            \   'php': ['prettier'],
+            \}
+let g:ale_fix_on_save = 1
 
 """""""""""""""""
 " Identline
@@ -182,7 +199,7 @@ augroup END
 " STATUS LINE ------------------------------------------------------------ {{{
 
 if !exists('g:airline_symbols')
-      let g:airline_symbols = {}
+    let g:airline_symbols = {}
 endif
 " powerline symbols
 let g:airline_left_sep = ''
@@ -197,7 +214,7 @@ let g:airline_symbols.dirty='⚡'
 
 let g:airline_theme='tomorrow'
 function! s:update_git_status()
-  let g:airline_section_b = "%{get(g:,'coc_git_status','')}"
+    let g:airline_section_b = "%{get(g:,'coc_git_status','')}"
 endfunction
 
 let g:airline_section_b = "%{get(g:,'coc_git_status','')}"
